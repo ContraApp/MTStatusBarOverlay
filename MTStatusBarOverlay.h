@@ -116,7 +116,9 @@ typedef enum MTMessageType {
 @property (nonatomic, copy) NSString *detailText;
 // the delegate of the overlay
 @property (nonatomic, unsafe_unretained) id<MTStatusBarOverlayDelegate> delegate;
-@property(nonatomic, strong) UIColor *customTextColor;
+
+@property(nonatomic, strong) UIColor *customBackgroundColor;
+
 //===========================================================
 #pragma mark -
 #pragma mark Class Methods

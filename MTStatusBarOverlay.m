@@ -39,14 +39,12 @@ void mt_dispatch_sync_on_main_thread(dispatch_block_t block);
 #pragma mark Defines
 ////////////////////////////////////////////////////////////////////////
 
-// macro to check if running on at least iOS 8
-#define kMTIsOperatingSystemAtLeast8 [[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] ? [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){8.0, 0.0, 0.0}] : NO
 // the height of the status bar
 #define kStatusBarHeight 20.f
-// width of the screen in present orientation
-#define kScreenWidth ((kMTIsOperatingSystemAtLeast8) ? [UIScreen mainScreen].nativeBounds.size.width/[UIScreen mainScreen].nativeScale : [UIScreen mainScreen].bounds.size.width)
-// height of the screen in present orientation
-#define kScreenHeight ((kMTIsOperatingSystemAtLeast8) ? [UIScreen mainScreen].nativeBounds.size.height/[UIScreen mainScreen].nativeScale : [UIScreen mainScreen].bounds.size.height)
+// width of the screen in portrait-orientation
+#define kScreenWidth [UIScreen mainScreen].bounds.size.width
+// height of the screen in portrait-orientation
+#define kScreenHeight [UIScreen mainScreen].bounds.size.height
 // macro for checking if we are on the iPad
 #define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 // macro for checking if we are on the iPad in iPhone-Emulation mode
@@ -64,9 +62,9 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 // Light Theme (for UIStatusBarStyleDefault)
 ///////////////////////////////////////////////////////
 
-#define kLightThemeTextColor						[UIColor blackColor]
-#define kLightThemeErrorMessageTextColor            [UIColor blackColor] // [UIColor colorWithRed:0.494898f green:0.330281f blue:0.314146f alpha:1.0f]
-#define kLightThemeFinishedMessageTextColor         [UIColor blackColor] // [UIColor colorWithRed:0.389487f green:0.484694f blue:0.38121f alpha:1.0f]
+#define kLightThemeTextColor						[UIColor whiteColor]
+#define kLightThemeErrorMessageTextColor            [UIColor whiteColor] // [UIColor colorWithRed:0.494898f green:0.330281f blue:0.314146f alpha:1.0f]
+#define kLightThemeFinishedMessageTextColor         [UIColor whiteColor] // [UIColor colorWithRed:0.389487f green:0.484694f blue:0.38121f alpha:1.0f]
 #define kLightThemeShadowColor                      [UIColor whiteColor]
 #define kLightThemeErrorMessageShadowColor          [UIColor whiteColor]
 #define kLightThemeFinishedMessageShadowColor       [UIColor whiteColor]
@@ -80,11 +78,11 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 // Dark Theme (for UIStatusBarStyleBlackOpaque)
 ///////////////////////////////////////////////////////
 
-#define kDarkThemeTextColor							[UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f]
-#define kDarkThemeErrorMessageTextColor             [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f] // [UIColor colorWithRed:0.918367f green:0.48385f blue:0.423895f alpha:1.0f]
-#define kDarkThemeFinishedMessageTextColor          [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f] // [UIColor colorWithRed:0.681767f green:0.918367f blue:0.726814f alpha:1.0f]
+#define kDarkThemeTextColor							[UIColor whiteColor]
+#define kDarkThemeErrorMessageTextColor             [UIColor whiteColor] // [UIColor colorWithRed:0.918367f green:0.48385f blue:0.423895f alpha:1.0f]
+#define kDarkThemeFinishedMessageTextColor          [UIColor whiteColor] // [UIColor colorWithRed:0.681767f green:0.918367f blue:0.726814f alpha:1.0f]
 #define kDarkThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleWhite
-#define kDarkThemeDetailViewBackgroundColor			[UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f]
+#define kDarkThemeDetailViewBackgroundColor			[UIColor whiteColor]
 #define kDarkThemeDetailViewBorderColor				[UIColor whiteColor]
 #define kDarkThemeHistoryTextColor					[UIColor whiteColor]
 
@@ -201,6 +199,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 // is called when the user swipes down the statusbar
 - (void)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer;
 - (void)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer;
+
+- (void)setCustomBackgroundColor:(UIColor *)customBackgroundColor;
 
 // updates the current status bar background image for the given style and current size
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style;
@@ -394,11 +394,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
-#ifdef __IPHONE_6_0
 		finishedLabel_.textAlignment = NSTextAlignmentCenter;
-#else
-		finishedLabel_.textAlignment = UITextAlignmentCenter;
-#endif
 		finishedLabel_.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:kFinishedFontSize];
         finishedLabel_.adjustsFontSizeToFitWidth = YES;
 		[self addSubviewToBackgroundView:finishedLabel_];
@@ -408,14 +404,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		statusLabel1_.backgroundColor = [UIColor clearColor];
 		statusLabel1_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
-		statusLabel1_.numberOfLines = 1;
-#ifdef __IPHONE_6_0
 		statusLabel1_.textAlignment = NSTextAlignmentCenter;
+		statusLabel1_.numberOfLines = 1;
 		statusLabel1_.lineBreakMode = NSLineBreakByTruncatingTail;
-#else
-		statusLabel1_.textAlignment = UITextAlignmentCenter;
-		statusLabel1_.lineBreakMode = UILineBreakModeTailTruncation;
-#endif
 		statusLabel1_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel1_];
         
@@ -424,14 +415,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		statusLabel2_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
-		statusLabel2_.numberOfLines = 1;
-#ifdef __IPHONE_6_0
 		statusLabel2_.textAlignment = NSTextAlignmentCenter;
+		statusLabel2_.numberOfLines = 1;
 		statusLabel2_.lineBreakMode = NSLineBreakByTruncatingTail;
-#else
-		statusLabel2_.textAlignment = UITextAlignmentCenter;
-		statusLabel2_.lineBreakMode = UILineBreakModeTailTruncation;
-#endif
 		statusLabel2_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel2_];
         
@@ -474,15 +460,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
     
 	delegate_ = nil;
-}
-
-////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark UIWindow
-////////////////////////////////////////////////////////////////////////
-
-- (UIViewController *)rootViewController {
-    return [UIApplication sharedApplication].delegate.window.rootViewController;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1097,10 +1074,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
         
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
-		cell.textLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kLightThemeHistoryTextColor : kDarkThemeHistoryTextColor;
+        cell.textLabel.textColor = [UIColor whiteColor];
         
 		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-		cell.detailTextLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kLightThemeHistoryTextColor : kDarkThemeHistoryTextColor;
+        cell.detailTextLabel.textColor = [UIColor whiteColor];
 	}
     
 	// step 3: set up cell value
@@ -1187,6 +1164,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 #pragma mark Private Methods
 ////////////////////////////////////////////////////////////////////////
 
+- (void)setCustomBackgroundColor:(UIColor *)customBackgroundColor {
+    _customBackgroundColor = customBackgroundColor;
+    statusBarBackgroundImageView_.backgroundColor = customBackgroundColor;
+}
+
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
@@ -1197,12 +1179,24 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		} else {
 			self.statusBarBackgroundImageView.image = [self.defaultStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		}
-		statusBarBackgroundImageView_.backgroundColor = [UIColor clearColor];
+        if (self.customBackgroundColor) {
+//            statusBarBackgroundImageView_.backgroundColor = self.customBackgroundColor;
+        }
+        else
+        {
+            // choose image depending on size
+            if (self.shrinked) {
+                    self.statusBarBackgroundImageView.image = [self.defaultStatusBarImageShrinked stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+                } else {
+                        self.statusBarBackgroundImageView.image = [self.defaultStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+                    }
+            }
+//		statusBarBackgroundImageView_.backgroundColor = [UIColor clearColor];
 	}
 	// black status bar? -> no image
 	else {
 		self.statusBarBackgroundImageView.image = nil;
-		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
+//		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
 	}
 }
 
@@ -1255,19 +1249,19 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		// set color of labels depending on messageType
         switch(messageType) {
             case MTMessageTypeFinish:
-                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
-                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
-                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
+                self.statusLabel1.textColor = kDarkThemeFinishedMessageTextColor;
+                self.statusLabel2.textColor = kDarkThemeFinishedMessageTextColor;
+                self.finishedLabel.textColor = kDarkThemeFinishedMessageTextColor;
                 break;
             case MTMessageTypeError:
-                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
-                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
-                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
+                self.statusLabel1.textColor = kDarkThemeErrorMessageTextColor;
+                self.statusLabel2.textColor = kDarkThemeErrorMessageTextColor;
+                self.finishedLabel.textColor = kDarkThemeErrorMessageTextColor;
                 break;
             default:
-                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
-                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
-                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
+                self.statusLabel1.textColor = kDarkThemeTextColor;
+                self.statusLabel2.textColor = kDarkThemeTextColor;
+                self.finishedLabel.textColor = kDarkThemeTextColor;
                 break;
         }
         self.statusLabel1.shadowColor = nil;
